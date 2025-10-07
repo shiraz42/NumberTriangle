@@ -104,32 +104,51 @@ public class NumberTriangle {
      * @throws IOException may naturally occur if an issue reading the file occurs
      */
     public static NumberTriangle loadTriangle(String fname) throws IOException {
-        // open the file and get a BufferedReader object whose methods
-        // are more convenient to work with when reading the file contents.
         InputStream inputStream = NumberTriangle.class.getClassLoader().getResourceAsStream(fname);
+        if (inputStream == null) {
+            throw new IOException("Resource not found: " + fname);
+        }
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-
-        // TODO define any variables that you want to use to store things
-
-        // will need to return the top of the NumberTriangle,
-        // so might want a variable for that.
         NumberTriangle top = null;
 
+        java.util.List<NumberTriangle> prevRow = null;
         String line = br.readLine();
+
         while (line != null) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                // parse all ints on this line
+                String[] parts = line.split("\\s+");
+                java.util.List<NumberTriangle> currRow = new java.util.ArrayList<>(parts.length);
 
-            // remove when done; this line is included so running starter code prints the contents of the file
-            System.out.println(line);
+                for (String p : parts) {
+                    int val = Integer.parseInt(p);
+                    currRow.add(new NumberTriangle(val));
+                }
 
-            // TODO process the line
+                // remember the very first node as the top
+                if (top == null) {
+                    top = currRow.get(0);
+                }
 
-            //read the next line
+                // link previous row to this row
+                if (prevRow != null) {
+                    for (int i = 0; i < prevRow.size(); i++) {
+                        prevRow.get(i).setLeft(currRow.get(i));
+                        prevRow.get(i).setRight(currRow.get(i + 1));
+                    }
+                }
+
+                prevRow = currRow;
+            }
             line = br.readLine();
         }
+
         br.close();
         return top;
     }
+
 
     public static void main(String[] args) throws IOException {
 
